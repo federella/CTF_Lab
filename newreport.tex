@@ -1,0 +1,178 @@
+\documentclass[12pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{graphicx}
+\usepackage{float}
+%\usepackage[colorinlistoftodos]{todonotes}
+\usepackage[left=1.00cm, right=1.00cm, top=1.00cm, bottom=1.50cm]{geometry}
+\author{Federica Consoli}
+\title{Web Application Challenge \\ \large Ethical Hacking Lab}
+
+\begin{document}
+	\maketitle
+	%INTRODUCTION
+	\section*{Introduction}
+		The goal of this report is to illustrate the steps taken to win the Web Application Challenge for the Ethical Hacking lab. For each level, there will be a short descritpion of the attack, what tools or command were used and which secrets were obtained.\\\\The challenge started at
+		 \texttt{http://eth-lab.di.uniroma1.it:55335/uegeteekairaigie}.
+		 
+	%LEVEL 1
+	\section*{Level 1}
+	\textbf{URL: }\texttt{http://eth-lab.di.uniroma1.it:55335/uegeteekairaigie }\\
+	\textbf{SECRET: }\texttt{http://eth-lab.di.uniroma1.it:55183/equaqueiveewaeva}\\\\
+	Using the tool \texttt{curl} I was able to retrieve the source of the web page. When looking at it, I noticed that the button of the login form was invoking a function called \texttt{verify} whenever clicked. Using \texttt{curl} once again, I was able to retrieve the function verify, as showed below.
+	
+	\begin{figure}[H]
+		\centering
+		\includegraphics[width=0.8\linewidth]{LVL1/curl}
+		\label{fig:curl}
+	\end{figure}
+	
+	This allowed me to retrieve the login details I needed (username: \texttt{SCRIPT}, password: \texttt{KIDDIE}) to obtain the url for the second challenge, as showed below.
+	\begin{figure}[H]
+		\centering
+		\includegraphics[width=0.7\linewidth]{LVL1/secret}
+		\label{fig:secret1}
+	\end{figure}
+	\newpage
+
+	%LEVEL 2
+	\section*{Level 2}
+	\textbf{URL: }\texttt{http://eth-lab.di.uniroma1.it:55183/equaqueiveewaeva}\\
+	\textbf{SECRET: }\texttt{http://eth-lab.di.uniroma1.it:55211/uipahphezieceefu}\\\\
+	Once again, I grabbed the web page using \texttt{curl}. I was initially misled by the presence of the MD5 hash of the correct password, but I then realized I did not need that solve the challenge: there was an image tag that pointed at  \texttt{scrt.png} and with the visibility property set at \texttt{hidden}, so I downloaded it using the \texttt{wget} tool.
+	\begin{figure}[H]
+		\centering
+		\includegraphics[width=0.7\linewidth]{LVL2/secret}
+		\label{fig:secret2}
+	\end{figure}
+	This way, I obtained the password \texttt{NINJAkitten}, which allowed me to get the URL of the next challenge.
+	\begin{figure}[H]
+		\centering
+		\includegraphics[width=0.7\linewidth]{LVL2/win}
+		\label{fig:win2}
+	\end{figure}
+
+	%LEVEL 3
+	\section*{Level 3}
+	\textbf{URL: }\texttt{http://eth-lab.di.uniroma1.it:55211/uipahphezieceefu}\\
+	\textbf{SECRET: }\texttt{http://eth-lab.di.uniroma1.it:55321/pileyooquaitaewu}\\\\
+	The first thing I tried for this level was entering a random combination of username and password, and I what I received was an error message saying that I needed to be an admin in order to login. After retrieving the webpage with \texttt{curl}, I noticed an hidden parameter called \texttt{admin} set to \texttt{False}. I then used \texttt{burp} as a proxy to intercept the http requests with the server, so that I could be able to edit the parameters in the \texttt{POST} request.
+	\begin{figure}[H]
+		\centering
+		\includegraphics[width=0.6\linewidth]{LVL3/admin}
+		\label{fig:admin3}
+	\end{figure}After changing the value of the \texttt{admin} parameter to \texttt{True}, I was able to retrieve the secret for the next challenge, as shown below.
+	\begin{figure}[H]
+		\centering
+		\includegraphics[width=0.7\linewidth]{LVL3/secret}
+		\label{fig:win3}
+	\end{figure}	 
+
+	%LEVEL 4
+	\section*{Level 4}
+	\textbf{URL: }\texttt{http://eth-lab.di.uniroma1.it:55321/pileyooquaitaewu}\\
+	\textbf{SECRET: }\texttt{http://eth-lab.di.uniroma1.it:55128/gaijeifieleeshee}\\\\
+	When clicking on the button "Verify my browser" I received an alert saying that only connections from \textit{``Kevin Browser Rocks"} are accepted. I once again used \texttt{burp} as a proxy to edit the header of the http request, changing the value of the property User-Agent to ``Kevin Browser Rocks". After clicking on the button again, I received another alert saying that only connections from \texttt{.ru} domains were accepted.\\
+	\begin{figure}[H]
+		\centering
+		\includegraphics[width=0.8\linewidth]{LVL4/final}
+		\label{fig:russian4}
+	\end{figure}
+	As shown above, I modified the request headers again, this time changing both the User-Agent and the Referer fields. This allowed me to retrieve the secret.
+	\begin{figure}[H]
+		\centering
+		\includegraphics[width=0.7\linewidth]{LVL4/secret}
+		\label{fig:secret4}
+	\end{figure}
+	\newpage
+
+	%LEVEL 5
+	\section*{Level 5}
+	\textbf{URL: }\texttt{http://eth-lab.di.uniroma1.it:55128/gaijeifieleeshee}\\
+	\textbf{SECRET: }\texttt{http://eth-lab.di.uniroma1.it:55034/ahsoophiecikiesh }\\\\
+	I retrieved the web page using \texttt{curl} and I noticed an HTML comment referring to \texttt{secret.txt}. When I visited the page, I was presented with the following message:
+	\begin{figure}[H]
+		\centering
+		\includegraphics[width=0.5\linewidth]{LVL5/text}
+		\label{fig:comment5}
+	\end{figure}
+	I then used \text{burp} to edit the http request for \texttt{cgi-bin/getsecret.js}, adding the Referer parameter, as follows:
+	\begin{figure}[H]
+		\centering
+		\includegraphics[width=0.8\linewidth]{LVL5/referer}
+		\label{fig:referer5}
+	\end{figure}
+	This allowed me to win the challenge and the retrieve the secret,
+	\begin{figure}[H]
+		\centering
+		\includegraphics[width=0.8\linewidth]{LVL5/secret}
+		\label{fig:secret5}
+	\end{figure}
+
+
+	%LEVEL 6
+	\section*{Level 6}
+	\textbf{URL: }\texttt{http://eth-lab.di.uniroma1.it:55034/ahsoophiecikiesh }\\
+	\textbf{SECRET: }\texttt{http://eth-lab.di.uniroma1.it:55368/eegathaiquaephei}\\\\
+	For this first level, I tried a couple of random combinations of username and password, but I would only get an error message saying the username was incorrect. I then tried using the username \texttt{admin} with password \texttt{admin}, and I was able to get to the page below.
+	\begin{figure}[H]
+		\centering
+		\includegraphics[width=0.6\linewidth]{LVL6/login}
+		\label{fig:login6}
+	\end{figure}
+	I noticed the the parameter \texttt{uid=0} in the url, so I tried to change it to \texttt{1} and noticed that it would give info about another user, Angelo. I kept on manually increasing the value of the parameter, and when I reached \texttt{uid=6} I was able to obtain the secret.
+	\begin{figure}[H]
+		\centering
+		\includegraphics[width=0.6\linewidth]{LVL6/secret}
+		\label{fig:secret6}
+	\end{figure}
+
+
+	%LEVEL 7
+	\section*{Level 7}
+	\textbf{URL: }\texttt{http://eth-lab.di.uniroma1.it:55368/eegathaiquaephei}\\
+	\textbf{SECRET: }\texttt{http://eth-lab.di.uniroma1.it:55508/eequohphaifiehee}\\\\
+
+
+	%LEVEL 8
+	\section*{Level 8}
+	\textbf{URL: }\texttt{http://eth-lab.di.uniroma1.it:55508/eequohphaifiehee}\\
+	\textbf{SECRET: }\texttt{http://eth-lab.di.uniroma1.it:55511/eigahvemoweipiep}\\\\
+
+
+	%LEVEL 9
+	\section*{Level 9}
+	\textbf{URL: }\texttt{http://eth-lab.di.uniroma1.it:55511/eigahvemoweipiep}\\
+	\textbf{SECRET: }\texttt{http://eth-lab.di.uniroma1.it:55093/pohvaireyingithe}\\\\
+
+
+	%LEVEL 10
+	\section*{Level 10}
+	\textbf{URL: }\texttt{http://eth-lab.di.uniroma1.it:55093/pohvaireyingithe}\\
+	\textbf{SECRET: }\texttt{http://eth-lab.di.uniroma1.it:55170/zeezoowietaighei}\\\\
+
+
+	%LEVEL 11
+	\section*{Level 11}
+	\textbf{URL: }\texttt{http://eth-lab.di.uniroma1.it:55170/zeezoowietaighei}\\
+	\textbf{SECRET: }\texttt{http://eth-lab.di.uniroma1.it:55199/urahreeghahjeugh/}\\\\
+
+	%LEVEL 12
+	\section*{Level 12}
+	\textbf{URL: }\texttt{http://eth-lab.di.uniroma1.it:55199/urahreeghahjeugh/}\\
+	\textbf{SECRET: }\texttt{http://eth-lab.di.uniroma1.it:55352/thozeewileiseero}\\\\
+
+	%LEVEL 13
+	\section*{Level 13}
+	\textbf{URL: }\texttt{http://eth-lab.di.uniroma1.it:55352/thozeewileiseero}\\
+	\textbf{SECRET: }\texttt{http://eth-lab.di.uniroma1.it:55367/aixedateediperai}\\\\
+
+	%LEVEL 14
+	\section*{Level 14}
+	\textbf{URL: }\texttt{http://eth-lab.di.uniroma1.it:55367/aixedateediperai}\\
+	\textbf{SECRET: }\texttt{}\\\\
+
+
+\end{document}
